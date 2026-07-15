@@ -39,9 +39,11 @@ import { SnackbarProvider } from './components/Snackbar'
 import { LiveOpsToasts } from './components/LiveOpsToasts'
 import { GlobalActionTooltips } from './components/GlobalActionTooltips'
 
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
+
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={routerBasename}>
       <DbBoot>
         <SnackbarProvider>
           <GlobalActionTooltips />
