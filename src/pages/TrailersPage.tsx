@@ -688,15 +688,6 @@ export function TrailersPage() {
                             : 'Yard → departure'}
                         </span>
                       ) : null}
-                      {t.recordStatus === 'active' ? (
-                        <button
-                          type="button"
-                          className="btn btn-ghost yard-status-update"
-                          onClick={() => openStatusModal(t)}
-                        >
-                          Update status
-                        </button>
-                      ) : null}
                     </div>
                   </td>
                   <td className="mono">{trailerLocation(t)}</td>

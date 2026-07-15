@@ -66,13 +66,17 @@ export default function App() {
                           </>
                         }
                       >
-                      <Route path="m" element={<MobileShell />}>
+                      <Route path="mobile" element={<MobileShell />}>
                         <Route index element={<MobileHome />} />
                         <Route path="scan" element={<MobileScan />} />
                         <Route path="inspect" element={<MobileInspect />} />
                         <Route path="alerts" element={<MobileAlerts />} />
                         <Route path="map" element={<MobileMap />} />
                       </Route>
+                      <Route
+                        path="m/*"
+                        element={<Navigate to="/mobile" replace />}
+                      />
                       <Route element={<AppShell />}>
                         <Route index element={<CommandCenter />} />
                         <Route path="yards" element={<YardMapPage />} />

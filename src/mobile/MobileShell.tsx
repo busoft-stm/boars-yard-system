@@ -9,11 +9,11 @@ const tabs: {
   icon: string
   end?: boolean
 }[] = [
-  { to: '/m', label: 'Home', icon: 'home', end: true },
-  { to: '/m/map', label: 'Yard', icon: 'map' },
-  { to: '/m/scan', label: 'Scan', icon: 'qr_code_scanner' },
-  { to: '/m/alerts', label: 'Alerts', icon: 'notifications' },
-  { to: '/m/inspect', label: 'Inspect', icon: 'fact_check' },
+  { to: '/mobile', label: 'Home', icon: 'home', end: true },
+  { to: '/mobile/map', label: 'Yard', icon: 'map' },
+  { to: '/mobile/scan', label: 'Scan', icon: 'qr_code_scanner' },
+  { to: '/mobile/alerts', label: 'Alerts', icon: 'notifications' },
+  { to: '/mobile/inspect', label: 'Inspect', icon: 'fact_check' },
 ]
 
 export function MobileShell() {
@@ -26,7 +26,7 @@ export function MobileShell() {
       if (window.opener && !window.opener.closed) {
         try {
           window.opener.focus()
-          const desktopUrl = `${window.location.origin}/`
+          const desktopUrl = `${window.location.origin}${import.meta.env.BASE_URL}`
           window.opener.location.assign(desktopUrl)
         } catch {
           // Cross-origin or blocked — still try to close this tab

@@ -139,7 +139,7 @@ export function MobileInspect() {
         <button
           type="button"
           className="m-link m-link-center"
-          onClick={() => navigate('/m/alerts')}
+          onClick={() => navigate('/mobile/alerts')}
         >
           View alerts
         </button>

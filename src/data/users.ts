@@ -107,7 +107,7 @@ export const ROLE_NAV: Record<UserRole, string[] | 'all'> = {
     '/reports',
     '/integrations',
     '/architecture',
-    '/m',
+    '/mobile',
   ],
   qa: [
     '/',
@@ -120,7 +120,7 @@ export const ROLE_NAV: Record<UserRole, string[] | 'all'> = {
     '/analytics',
     '/reports',
     '/infrastructure',
-    '/m',
+    '/mobile',
   ],
   gate: [
     '/',
@@ -131,7 +131,7 @@ export const ROLE_NAV: Record<UserRole, string[] | 'all'> = {
     '/movements',
     '/devices',
     '/infrastructure',
-    '/m',
+    '/mobile',
   ],
   viewer: [
     '/',
@@ -150,7 +150,9 @@ export function roleCanAccess(role: UserRole, path: string) {
   const allow = ROLE_NAV[role]
   if (allow === 'all') return true
   if (path.startsWith('/trailer/')) return allow.includes('/trailers')
-  if (path.startsWith('/m')) return allow.includes('/m')
+  if (path === '/mobile' || path.startsWith('/mobile/')) {
+    return allow.includes('/mobile')
+  }
   if (path === '/users') return role === 'admin'
   // Legacy redirects: /alerts and /walk → /exceptions
   if (path === '/alerts' || path === '/walk') {

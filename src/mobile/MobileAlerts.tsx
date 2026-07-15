@@ -69,7 +69,7 @@ export function MobileAlerts() {
               <button
                 type="button"
                 className="m-row m-row-btn"
-                onClick={() => navigate(`/m/inspect?trailer=${t.id}`)}
+                onClick={() => navigate(`/mobile/inspect?trailer=${t.id}`)}
               >
                 <span
                   className={`m-priority ${
@@ -91,7 +91,7 @@ export function MobileAlerts() {
                 <button
                   type="button"
                   className="m-btn m-btn-primary m-btn-sm"
-                  onClick={() => navigate(`/m/inspect?trailer=${t.id}`)}
+                  onClick={() => navigate(`/mobile/inspect?trailer=${t.id}`)}
                 >
                   Resolve
                 </button>

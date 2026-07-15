@@ -36,7 +36,7 @@ export function MobileHome() {
         <button
           type="button"
           className="m-btn m-btn-primary"
-          onClick={() => navigate('/m/scan')}
+          onClick={() => navigate('/mobile/scan')}
         >
           <MaterialIcon name="qr_code_scanner" size={20} />
           Scan trailer
@@ -44,7 +44,7 @@ export function MobileHome() {
         <button
           type="button"
           className="m-btn m-btn-secondary"
-          onClick={() => navigate('/m/inspect')}
+          onClick={() => navigate('/mobile/inspect')}
         >
           <MaterialIcon name="fact_check" size={20} />
           Inspect
@@ -57,7 +57,7 @@ export function MobileHome() {
           <button
             type="button"
             className="m-stat"
-            onClick={() => navigate('/m/inspect')}
+            onClick={() => navigate('/mobile/inspect')}
           >
             <span>Queue</span>
             <strong>{metrics.walkCount}</strong>
@@ -65,7 +65,7 @@ export function MobileHome() {
           <button
             type="button"
             className="m-stat m-stat-alert"
-            onClick={() => navigate('/m/alerts')}
+            onClick={() => navigate('/mobile/alerts')}
           >
             <span>Critical</span>
             <strong>{metrics.critical}</strong>
@@ -73,7 +73,7 @@ export function MobileHome() {
           <button
             type="button"
             className="m-stat"
-            onClick={() => navigate('/m/alerts')}
+            onClick={() => navigate('/mobile/alerts')}
           >
             <span>Alerts</span>
             <strong>{alerts}</strong>
@@ -117,7 +117,7 @@ export function MobileHome() {
           <button
             type="button"
             className="m-link"
-            onClick={() => navigate('/m/inspect')}
+            onClick={() => navigate('/mobile/inspect')}
           >
             See all
           </button>
@@ -128,7 +128,7 @@ export function MobileHome() {
               key={t.id}
               type="button"
               className="m-row m-row-btn"
-              onClick={() => navigate(`/m/inspect?trailer=${t.id}`)}
+              onClick={() => navigate(`/mobile/inspect?trailer=${t.id}`)}
             >
               <span
                 className={`m-priority ${t.tempStatus === 'ok' ? 'warn' : t.tempStatus}`}

@@ -48,3 +48,26 @@ export function formatDwellShort(hours: number): string {
   if (hours < 1) return `${Math.round(hours * 60)}m`
   return `${hours.toFixed(1)} hr`
 }
+
+export function formatRelativeAgo(ms: number, now = Date.now()): string {
+  const delta = Math.max(0, now - ms)
+  const sec = Math.floor(delta / 1000)
+  if (sec < 45) return 'Just now'
+  const min = Math.floor(sec / 60)
+  if (min < 60) return `${min} min ago`
+  const hr = Math.floor(min / 60)
+  const rem = min % 60
+  if (rem === 0) return `${hr} hr ago`
+  return `${hr} hr ${rem} min ago`
+}
+
+export function siteAsOfLabel(now = new Date()): string {
+  const day = now.toLocaleDateString(US, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'America/New_York',
+  })
+  return `${day} · ${formatUsTime(now)} ET`
+}

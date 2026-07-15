@@ -44,6 +44,10 @@ import {
 } from '../data/trailers'
 import { formatUsDateTime, formatUsTime } from '../utils/usFormat'
 import { db, loadYardLayout, saveYardLayout } from '../db/yardDb'
+import {
+  runTelemetryTick,
+  TELEMETRY_TICK_MS,
+} from '../db/telemetrySimulator'
 
 export type AddTrailerOptions = {
   /**
@@ -163,6 +167,29 @@ function timeNow() {
   return formatUsTime()
 }
 
+function nowMs() {
+  return Date.now()
+}
+
+function stampMovement(
+  partial: Omit<Movement, 'time' | 'timeMs'>,
+): Movement {
+  const ms = nowMs()
+  return { ...partial, time: formatUsTime(new Date(ms)), timeMs: ms }
+}
+
+function stampGateEvent(
+  partial: Omit<GateEvent, 'time' | 'timeMs'>,
+): GateEvent {
+  const ms = nowMs()
+  return { ...partial, time: formatUsTime(new Date(ms)), timeMs: ms }
+}
+
+function liveTouch(): Pick<Trailer, 'lastUpdate' | 'lastTelemetryAtMs'> {
+  const ms = nowMs()
+  return { lastUpdate: 'Just now', lastTelemetryAtMs: ms }
+}
+
 function normalizeTrailer(t: Trailer): Trailer {
   return withMasterDefaults(t)
 }
@@ -182,8 +209,12 @@ export function YardProvider({ children }: { children: ReactNode }) {
       loadYardLayout(),
     ])
     setTrailers(t.map(normalizeTrailer))
-    setMovements(m)
-    setGateEvents(g)
+    setMovements(
+      m.sort((a, b) => (b.timeMs ?? 0) - (a.timeMs ?? 0)),
+    )
+    setGateEvents(
+      g.sort((a, b) => (b.timeMs ?? 0) - (a.timeMs ?? 0)),
+    )
     setLayout(yardLayout)
   }, [])
 
@@ -200,6 +231,28 @@ export function YardProvider({ children }: { children: ReactNode }) {
       cancelled = true
     }
   }, [refresh])
+
+  useEffect(() => {
+    if (!ready) return
+    let cancelled = false
+
+    async function tick() {
+      if (cancelled) return
+      try {
+        await runTelemetryTick()
+        if (!cancelled) await refresh()
+      } catch {
+        /* ignore background tick errors */
+      }
+    }
+
+    void tick()
+    const id = window.setInterval(() => void tick(), TELEMETRY_TICK_MS)
+    return () => {
+      cancelled = true
+      window.clearInterval(id)
+    }
+  }, [ready, refresh])
 
   const slots = useMemo(() => buildSlots(trailers, layout), [trailers, layout])
   const metrics = useMemo(
@@ -426,6 +479,7 @@ export function YardProvider({ children }: { children: ReactNode }) {
           input.seal.trim() ||
           `SL-${Math.floor(90000 + Math.random() * 9999)}`,
         arrivedAt: asRegister ? '—' : nowLabel(),
+        arrivedAtMs: asRegister ? undefined : nowMs(),
         dwellHours: asRegister ? 0 : 0.1,
         setpoint: input.setpoint ?? input.defaultSetpoint,
         actual: input.actual,
@@ -433,6 +487,7 @@ export function YardProvider({ children }: { children: ReactNode }) {
         tempStatus: input.tempStatus,
         reeferAlarm: input.reeferAlarm,
         lastUpdate: 'Just now',
+        lastTelemetryAtMs: asRegister ? undefined : nowMs(),
         telemetry: input.telemetry,
         product: input.product.trim() || 'General · chilled',
         history,
@@ -460,13 +515,12 @@ export function YardProvider({ children }: { children: ReactNode }) {
         ...patch,
         id,
         number: (patch.number ?? existing.number).trim().toUpperCase(),
-        lastUpdate: 'Just now',
+        ...liveTouch(),
       }
 
       if (patch.status && patch.status !== existing.status) {
-        const movement: Movement = {
+        const movement = stampMovement({
           id: `m-${Date.now()}`,
-          time: timeNow(),
           trailerNumber: next.number,
           trailerId: next.id,
           type: 'hold',
@@ -474,7 +528,7 @@ export function YardProvider({ children }: { children: ReactNode }) {
           to: patch.status,
           by: 'Yard operations',
           note: 'Yard status updated in trailer management',
-        }
+        })
         await db.transaction('rw', db.trailers, db.movements, async () => {
           await db.trailers.put(next)
           await db.movements.put(movement)
@@ -681,6 +735,7 @@ export function YardProvider({ children }: { children: ReactNode }) {
         dockRequired: input.dockRequired ?? trailer.dockRequired ?? true,
         seal,
         arrivedAt: nowLabel(),
+        arrivedAtMs: nowMs(),
         dwellHours: 0.1,
         direction: input.direction ?? 'inbound',
         setpoint:
@@ -689,15 +744,14 @@ export function YardProvider({ children }: { children: ReactNode }) {
             : (trailer.setpoint ?? trailer.defaultSetpoint),
         actual:
           input.actualTemp != null ? input.actualTemp : trailer.actual,
-        lastUpdate: 'Just now',
+        ...liveTouch(),
         notes: trailer.notes?.includes('register')
           ? undefined
           : trailer.notes,
       }
 
-      const movement: Movement = {
+      const movement = stampMovement({
         id: `m-${Date.now()}`,
-        time: timeNow(),
         trailerNumber: next.number,
         trailerId: next.id,
         type: 'gate_in',
@@ -707,11 +761,10 @@ export function YardProvider({ children }: { children: ReactNode }) {
         note: slot
           ? `Gate check-in · ${selectedLane.name} · assigned to ${slot}`
           : `Gate check-in · ${selectedLane.name}`,
-      }
+      })
 
-      const gate: GateEvent = {
+      const gate = stampGateEvent({
         id: `g-${Date.now()}`,
-        time: timeNow(),
         direction: 'in',
         trailerNumber: next.number,
         trailerId: next.id,
@@ -719,7 +772,7 @@ export function YardProvider({ children }: { children: ReactNode }) {
         seal: next.seal,
         status: slot ? 'cleared' : 'processing',
         lane: selectedLane.name,
-      }
+      })
 
       await db.transaction(
         'rw',

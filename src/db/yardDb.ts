@@ -1,21 +1,17 @@
 import Dexie, { type EntityTable } from 'dexie'
 import type { AuthUser } from '../auth/types'
 import {
-  gateEvents as seedGateEvents,
-  movements as seedMovements,
-  trailers as seedTrailers,
-  type GateEvent,
-  type Movement,
-  type Trailer,
-} from '../data/trailers'
-import { seedUsers, type ManagedUser, DEFAULT_USER_PASSWORD } from '../data/users'
-import { seedDevices, type YardDevice } from '../data/platform'
-import {
   DEFAULT_YARD_LAYOUT,
   normalizeYardLayout,
   withMasterDefaults,
+  type GateEvent,
+  type Movement,
+  type Trailer,
   type YardLayout,
 } from '../data/trailers'
+import { seedUsers, type ManagedUser, DEFAULT_USER_PASSWORD } from '../data/users'
+import { seedDevices, type YardDevice } from '../data/platform'
+import { buildLiveSeed } from './liveSeed'
 
 type MetaRow = { key: string; value: string }
 
@@ -67,6 +63,7 @@ class BoarsHeadYardDB extends Dexie {
 export const db = new BoarsHeadYardDB()
 
 const SEEDED_KEY = 'seeded_v1'
+const LIVE_SEED_V3 = 'live_seed_v3'
 const DEVICES_SEEDED_KEY = 'devices_seeded_v2'
 const REGISTER_EXTRA_KEY = 'register_extra_v1'
 const YARD_LAYOUT_KEY = 'yard_layout_v1'
@@ -75,6 +72,7 @@ const AUTH_KEY = 'auth_session'
 export async function ensureDbSeeded() {
   const seeded = await db.meta.get(SEEDED_KEY)
   if (seeded?.value !== '1') {
+    const { trailers, movements, gateEvents } = buildLiveSeed()
     await db.transaction(
       'rw',
       db.users,
@@ -86,12 +84,34 @@ export async function ensureDbSeeded() {
         const userCount = await db.users.count()
         if (userCount === 0) await db.users.bulkAdd(seedUsers)
         const trailerCount = await db.trailers.count()
-        if (trailerCount === 0) await db.trailers.bulkAdd(seedTrailers)
+        if (trailerCount === 0) await db.trailers.bulkAdd(trailers)
         const moveCount = await db.movements.count()
-        if (moveCount === 0) await db.movements.bulkAdd(seedMovements)
+        if (moveCount === 0) await db.movements.bulkAdd(movements)
         const gateCount = await db.gateEvents.count()
-        if (gateCount === 0) await db.gateEvents.bulkAdd(seedGateEvents)
+        if (gateCount === 0) await db.gateEvents.bulkAdd(gateEvents)
         await db.meta.put({ key: SEEDED_KEY, value: '1' })
+      },
+    )
+  }
+
+  // Refresh yard ops sample with live timestamps + cleaned gate history.
+  const liveSeed = await db.meta.get(LIVE_SEED_V3)
+  if (liveSeed?.value !== '1') {
+    const { trailers, movements, gateEvents } = buildLiveSeed()
+    await db.transaction(
+      'rw',
+      db.trailers,
+      db.movements,
+      db.gateEvents,
+      db.meta,
+      async () => {
+        await db.trailers.clear()
+        await db.movements.clear()
+        await db.gateEvents.clear()
+        await db.trailers.bulkAdd(trailers)
+        await db.movements.bulkAdd(movements)
+        await db.gateEvents.bulkAdd(gateEvents)
+        await db.meta.put({ key: LIVE_SEED_V3, value: '1' })
       },
     )
   }
@@ -112,7 +132,7 @@ export async function ensureDbSeeded() {
   // Ensure register demo units exist for gate check-in
   const extra = await db.meta.get(REGISTER_EXTRA_KEY)
   if (extra?.value !== '1') {
-    const extras = seedTrailers.filter(
+    const extras = (await db.trailers.toArray()).filter(
       (t) => t.id === 'bh-5501' || t.id === 'cx-9901',
     )
     await db.transaction('rw', db.trailers, db.meta, async () => {

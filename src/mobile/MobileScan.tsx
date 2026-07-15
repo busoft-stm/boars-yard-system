@@ -75,7 +75,7 @@ export function MobileScan() {
                 key={t.id}
                 type="button"
                 className="m-row m-row-btn"
-                onClick={() => navigate(`/m/inspect?trailer=${t.id}`)}
+                onClick={() => navigate(`/mobile/inspect?trailer=${t.id}`)}
               >
                 <div className="m-row-icon tone-ok">
                   <MaterialIcon name="local_shipping" size={20} />

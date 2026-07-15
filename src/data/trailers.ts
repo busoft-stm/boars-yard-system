@@ -1,3 +1,5 @@
+import { formatRelativeAgo } from '../utils/usFormat'
+
 export type TempStatus = 'ok' | 'warn' | 'critical' | 'offline' | 'na'
 export type Ownership = 'bh' | 'carrier'
 export type TrailerRecordStatus = 'active' | 'disabled'
@@ -255,6 +257,8 @@ export interface Trailer {
   masterNotes?: string
   seal: string
   arrivedAt: string
+  /** Epoch ms — check-in / arrival for live dwell calculation */
+  arrivedAtMs?: number
   dwellHours: number
   setpoint: number | null
   actual: number | null
@@ -262,6 +266,8 @@ export interface Trailer {
   tempStatus: TempStatus
   reeferAlarm: boolean
   lastUpdate: string
+  /** Epoch ms — last telemetry read for relative “updated” labels */
+  lastTelemetryAtMs?: number
   telemetry: boolean
   product: string
   history: TempPoint[]
@@ -300,6 +306,8 @@ export interface Slot {
 export interface Movement {
   id: string
   time: string
+  /** Epoch ms for sorting / recency */
+  timeMs?: number
   trailerNumber: string
   trailerId: string
   type: 'gate_in' | 'gate_out' | 'slot_move' | 'dock_assign' | 'undock' | 'hold' | 'stage_outbound'
@@ -312,6 +320,7 @@ export interface Movement {
 export interface GateEvent {
   id: string
   time: string
+  timeMs?: number
   direction: 'in' | 'out'
   trailerNumber: string
   trailerId: string
@@ -361,12 +370,10 @@ export function withMasterDefaults(t: Trailer): Trailer {
     opsHold = 'yard'
   }
 
-  let dockPhase: DockPhase =
-    status === 'At dock'
-      ? (t.dockPhase ?? 'complete')
-      : 'idle'
+  const dockPhase: DockPhase =
+    status === 'At dock' ? (t.dockPhase ?? 'complete') : 'idle'
 
-  return {
+  return applyLiveTimingFields({
     ...t,
     status,
     opsHold,
@@ -385,7 +392,20 @@ export function withMasterDefaults(t: Trailer): Trailer {
     homeSite: t.homeSite?.trim() || SITE.name,
     fleetAssetId: t.fleetAssetId,
     masterNotes: t.masterNotes,
+  })
+}
+
+/** Recompute dwell + relative telemetry labels from epoch fields. */
+export function applyLiveTimingFields(t: Trailer, now = Date.now()): Trailer {
+  let dwellHours = t.dwellHours
+  if (t.arrivedAtMs != null && t.status !== 'Departed') {
+    dwellHours = Math.max(0.1, (now - t.arrivedAtMs) / (60 * 60 * 1000))
   }
+  const lastUpdate =
+    t.lastTelemetryAtMs != null
+      ? formatRelativeAgo(t.lastTelemetryAtMs, now)
+      : t.lastUpdate
+  return { ...t, dwellHours, lastUpdate }
 }
 
 export function trailerNeedsDock(t: Pick<Trailer, 'dockRequired'>) {

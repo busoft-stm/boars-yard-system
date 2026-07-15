@@ -2999,12 +2999,6 @@ tr:last-child td {
   line-height: 1.35;
 }
 
-.yard-status-update {
-  padding: 0.28rem 0.65rem;
-  font-size: 0.78rem;
-  min-height: 0;
-}
-
 .status-modal-summary {
   display: flex;
   align-items: center;

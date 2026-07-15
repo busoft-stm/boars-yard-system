@@ -84,7 +84,7 @@ export function MobileMap() {
               type="button"
               className={`m-slot ${tone}`}
               onClick={() =>
-                t ? navigate(`/m/inspect?trailer=${t.id}`) : undefined
+                t ? navigate(`/mobile/inspect?trailer=${t.id}`) : undefined
               }
             >
               <span className="m-slot-label">{s.label}</span>

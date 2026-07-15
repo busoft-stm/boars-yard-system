@@ -225,7 +225,10 @@ export function AppShell() {
 
   const exceptionsActive = location.pathname.startsWith('/exceptions')
   const movementActive = location.pathname.startsWith('/movements')
-  const mobileActive = location.pathname.startsWith('/m')
+  const mobileActive =
+    location.pathname === '/mobile' ||
+    location.pathname.startsWith('/mobile/')
+  const mobileUrl = `${window.location.origin}${import.meta.env.BASE_URL}mobile`
 
   return (
     <div className="app app-shell">
@@ -303,13 +306,13 @@ export function AppShell() {
               Movement
             </NavLink>
             <a
-              href="/m"
+              href={mobileUrl}
               className={`app-top-link ${mobileActive ? 'active' : ''}`}
               target="_blank"
               rel="opener"
               onClick={(e) => {
                 e.preventDefault()
-                window.open(`${window.location.origin}/m`, '_blank')
+                window.open(mobileUrl, '_blank')
               }}
             >
               <MaterialIcon name="smartphone" size={18} />

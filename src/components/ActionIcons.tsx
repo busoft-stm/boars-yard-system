@@ -55,7 +55,7 @@ export function IconKey() {
 }
 
 export function IconStatus() {
-  return <MaterialIcon name="format_list_bulleted" size={18} />
+  return <MaterialIcon name="swap_horiz" size={18} />
 }
 
 export function IconAssignSlot() {
