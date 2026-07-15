@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { BRAND_LOGO_SRC } from '../components/BrandLogo'
 import { ensureDbSeeded } from './yardDb'
 
 export function DbBoot({ children }: { children: ReactNode }) {
@@ -34,7 +35,7 @@ export function DbBoot({ children }: { children: ReactNode }) {
   if (!ready) {
     return (
       <div className="db-boot">
-        <img src="/boars_head_logo.webp" alt="Boar’s Head" className="db-boot-logo" />
+        <img src={BRAND_LOGO_SRC} alt="Boar’s Head" className="db-boot-logo" />
         <p>Loading Smart Yard…</p>
       </div>
     )
