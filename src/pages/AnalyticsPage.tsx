@@ -239,7 +239,7 @@ export function AnalyticsPage() {
               type="button"
               role="tab"
               className="chip"
-              onClick={() => navigate('/map')}
+              onClick={() => navigate('/yards')}
             >
               Yards
             </button>
@@ -432,7 +432,7 @@ export function AnalyticsPage() {
                   key={z.zone}
                   type="button"
                   className="analytics-zone-card"
-                  onClick={() => navigate('/map')}
+                  onClick={() => navigate('/yards')}
                 >
                   <span>Zone {z.zone}</span>
                   <strong>

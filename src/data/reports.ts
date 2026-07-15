@@ -20,7 +20,12 @@ export type ReportId =
   | 'infrastructure_ops'
   | 'exception_summary'
 
-export type ReportPeriod = 'today' | '7d' | '30d'
+export type ReportPeriod = 'today' | '7d' | '30d' | 'custom'
+
+export type ReportDateRange = {
+  start: string
+  end: string
+}
 
 export type ReportDefinition = {
   id: ReportId
@@ -28,6 +33,11 @@ export type ReportDefinition = {
   description: string
   icon: string
   category: string
+  audience: string
+  freshness: string
+  dataSources: string[]
+  includes: string[]
+  columns: string[]
 }
 
 export type GeneratedReport = {
@@ -49,6 +59,16 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     description: 'Slot occupancy, zone fill, and dock door use across the site.',
     icon: 'grid_view',
     category: 'Yard',
+    audience: 'Yard ops · site leads',
+    freshness: 'Live yard layout',
+    dataSources: ['Parking zones', 'Dock doors', 'On-site trailer inventory'],
+    includes: [
+      'Zone fill percentages',
+      'Dock door occupancy',
+      'Near-capacity flags',
+      'Site occupancy KPIs',
+    ],
+    columns: ['Zone', 'Used', 'Capacity', 'Fill %', 'Status'],
   },
   {
     id: 'cold_chain',
@@ -56,6 +76,24 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     description: 'Temperature status, excursions, and reefer telemetry coverage.',
     icon: 'ac_unit',
     category: 'Cold chain',
+    audience: 'QA · cold-chain ops',
+    freshness: 'Telemetry snapshot',
+    dataSources: ['Reefer telemetry', 'Trailer temperature status', 'Alarm flags'],
+    includes: [
+      'Actual vs setpoint',
+      'Excursion and warming counts',
+      'Telemetry coverage',
+      'Carrier / ownership context',
+    ],
+    columns: [
+      'Trailer',
+      'Carrier',
+      'Status',
+      'Actual',
+      'Setpoint',
+      'Telemetry',
+      'Reefer',
+    ],
   },
   {
     id: 'gate_activity',
@@ -63,6 +101,16 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     description: 'Inbound and outbound gate events, holds, and lane throughput.',
     icon: 'sensor_door',
     category: 'Gate',
+    audience: 'Gate · security',
+    freshness: 'Gate event log',
+    dataSources: ['Gate lanes', 'Check-in / check-out events', 'Hold queue'],
+    includes: [
+      'Inbound and outbound volume',
+      'Lane assignment',
+      'Held arrivals',
+      'Carrier at gate',
+    ],
+    columns: ['Time', 'Direction', 'Trailer', 'Lane', 'Status', 'Carrier'],
   },
   {
     id: 'trailer_dwell',
@@ -70,6 +118,24 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     description: 'Hours on site, long-dwell flags, and slot assignment history.',
     icon: 'schedule',
     category: 'Yard',
+    audience: 'Yard ops · planning',
+    freshness: 'Live dwell clock',
+    dataSources: ['Trailer inventory', 'Slot assignments', 'Ops holds'],
+    includes: [
+      'Dwell hours ranked',
+      'Long-dwell trailers',
+      'Zone / slot location',
+      'Cold-chain and hold overlays',
+    ],
+    columns: [
+      'Trailer',
+      'Zone',
+      'Slot',
+      'Dwell (h)',
+      'Status',
+      'Cold chain',
+      'Hold',
+    ],
   },
   {
     id: 'carrier_performance',
@@ -77,6 +143,16 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     description: 'On-site carrier mix, incident rates, and compliance scores.',
     icon: 'local_shipping',
     category: 'Operations',
+    audience: 'Site lead · carrier relations',
+    freshness: 'On-site aggregation',
+    dataSources: ['Trailer ownership', 'Temp / reefer incidents', 'Fleet mix'],
+    includes: [
+      'Trailers per carrier',
+      'Incident counts',
+      'Incident rate bars',
+      'BH-owned vs carrier mix',
+    ],
+    columns: ['Carrier', 'On site', 'Incidents', 'Rate'],
   },
   {
     id: 'device_telemetry',
@@ -84,6 +160,28 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     description: 'Trailer device assignment, battery, and sensor coverage.',
     icon: 'devices',
     category: 'Devices',
+    audience: 'Device ops · IT / OT',
+    freshness: 'Device heartbeat',
+    dataSources: [
+      'Trailer devices',
+      'Battery and connectivity',
+      'Capability coverage KPIs',
+    ],
+    includes: [
+      'Assignment status',
+      'Battery health',
+      'Connectivity profile',
+      'GPS / BLE / telemetry coverage',
+    ],
+    columns: [
+      'Device ID',
+      'Class',
+      'Trailer',
+      'Status',
+      'Battery %',
+      'Connectivity',
+      'Capabilities',
+    ],
   },
   {
     id: 'infrastructure_ops',
@@ -91,6 +189,20 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     description: 'Fixed asset status, auto movements, and infrastructure alerts.',
     icon: 'cell_tower',
     category: 'Infrastructure',
+    audience: 'Infrastructure · OT',
+    freshness: 'Infra ops center',
+    dataSources: [
+      'Fixed RFID / BLE / gateway assets',
+      'Auto trailer movements',
+      'Infrastructure alerts',
+    ],
+    includes: [
+      'Asset health scores',
+      'Online / offline status',
+      'Auto-detected movements',
+      'Open infrastructure alerts',
+    ],
+    columns: ['Device', 'Kind', 'Zone', 'Status', 'Health', 'Last seen'],
   },
   {
     id: 'exception_summary',
@@ -98,6 +210,23 @@ export const REPORT_DEFINITIONS: ReportDefinition[] = [
     description: 'Open and resolved exceptions with severity and SLA posture.',
     icon: 'warning',
     category: 'Operations',
+    audience: 'Exceptions · supervisors',
+    freshness: 'Exception queue',
+    dataSources: ['Exception playbooks', 'Assignments', 'Severity / SLA'],
+    includes: [
+      'Open vs resolved counts',
+      'Critical severity volume',
+      'Assignee and SLA minutes',
+      'Playbook reason codes',
+    ],
+    columns: [
+      'Trailer',
+      'Reason',
+      'Severity',
+      'Status',
+      'Assignee',
+      'SLA (min)',
+    ],
   },
 ]
 
@@ -151,6 +280,7 @@ const PERIOD_LABEL: Record<ReportPeriod, string> = {
   today: 'Today',
   '7d': 'Last 7 days',
   '30d': 'Last 30 days',
+  custom: 'Custom date range',
 }
 
 function periodRowLimit(period: ReportPeriod) {
@@ -159,10 +289,21 @@ function periodRowLimit(period: ReportPeriod) {
   return 40
 }
 
+function formatReportDate(value: string) {
+  if (!value) return ''
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${value}T00:00:00Z`))
+}
+
 export function generateReport(
   id: ReportId,
   period: ReportPeriod,
   data: ReportDataInput,
+  dateRange?: ReportDateRange,
 ): GeneratedReport {
   const def = REPORT_DEFINITIONS.find((r) => r.id === id)!
   const generatedAt = formatUsDateTime()
@@ -170,7 +311,10 @@ export function generateReport(
     id,
     title: def.title,
     period,
-    periodLabel: PERIOD_LABEL[period],
+    periodLabel:
+      period === 'custom' && dateRange
+        ? `${formatReportDate(dateRange.start)} – ${formatReportDate(dateRange.end)}`
+        : PERIOD_LABEL[period],
     generatedAt,
     site: SITE.name,
   }
@@ -294,7 +438,7 @@ export function generateReport(
             String(t.dwellHours),
             t.status,
             t.tempStatus,
-            t.opsHold !== 'none' ? t.opsHold : '—',
+            t.opsHold && t.opsHold !== 'none' ? t.opsHold : '—',
           ]),
         summary: [
           { label: 'Long dwell', value: String(data.metrics.longDwell) },
@@ -456,10 +600,88 @@ export function downloadReportCsv(report: GeneratedReport) {
   const blob = new Blob([reportToCsv(report)], {
     type: 'text/csv;charset=utf-8',
   })
+  downloadBlob(blob, `${report.id}-${report.period}-${SITE.code}.csv`)
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+function reportTableHtml(report: GeneratedReport) {
+  const summary = report.summary
+    .map(
+      (item) =>
+        `<div><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong></div>`,
+    )
+    .join('')
+  const headers = report.columns
+    .map((column) => `<th>${escapeHtml(column)}</th>`)
+    .join('')
+  const rows = report.rows
+    .map(
+      (row) =>
+        `<tr>${row.map((cell) => `<td>${escapeHtml(String(cell))}</td>`).join('')}</tr>`,
+    )
+    .join('')
+  return `
+    <h1>${escapeHtml(report.title)}</h1>
+    <p>${escapeHtml(report.site)} · ${escapeHtml(report.periodLabel)}</p>
+    <p>Generated ${escapeHtml(report.generatedAt)}</p>
+    <div class="summary">${summary}</div>
+    <table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table>
+  `
+}
+
+function reportDocument(report: GeneratedReport) {
+  return `<!doctype html>
+  <html><head><meta charset="utf-8"><title>${escapeHtml(report.title)}</title>
+  <style>
+    body{font-family:Arial,sans-serif;color:#34302b;margin:32px}
+    h1{color:#8f1326;margin-bottom:6px}p{color:#6f685c}
+    .summary{display:flex;gap:12px;margin:24px 0}
+    .summary div{border:1px solid #d9cfbd;padding:12px 18px;min-width:120px}
+    .summary span{display:block;font-size:11px;text-transform:uppercase;color:#6f685c}
+    .summary strong{display:block;font-size:22px;margin-top:5px}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    th,td{border:1px solid #d9cfbd;padding:8px;text-align:left}
+    th{background:#f4ecdf;color:#5d1420;text-transform:uppercase;font-size:10px}
+    @media print{body{margin:12mm}.summary{break-inside:avoid}}
+  </style></head><body>${reportTableHtml(report)}</body></html>`
+}
+
+function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${report.id}-${report.period}-${SITE.code}.csv`
+  a.download = filename
   a.click()
   URL.revokeObjectURL(url)
+}
+
+export function downloadReportExcel(report: GeneratedReport) {
+  const blob = new Blob([`\uFEFF${reportDocument(report)}`], {
+    type: 'application/vnd.ms-excel;charset=utf-8',
+  })
+  downloadBlob(blob, `${report.id}-${report.period}-${SITE.code}.xls`)
+}
+
+export function printReportPdf(report: GeneratedReport) {
+  const popup = window.open('', '_blank')
+  if (!popup) return false
+  popup.document.open()
+  popup.document.write(reportDocument(report))
+  popup.document.close()
+  popup.addEventListener(
+    'load',
+    () => {
+      popup.focus()
+      popup.print()
+    },
+    { once: true },
+  )
+  return true
 }

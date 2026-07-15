@@ -175,7 +175,7 @@ export function InsightsPage() {
       step: '3',
       title: 'Clear aged dwell',
       detail: `${metrics.longDwell} over 12 hours`,
-      to: '/map',
+      to: '/yards',
     },
     {
       step: '4',
@@ -400,7 +400,7 @@ export function InsightsPage() {
             <button
               type="button"
               className="btn btn-ghost"
-              onClick={() => navigate('/map')}
+              onClick={() => navigate('/yards')}
             >
               Map
             </button>
@@ -411,7 +411,7 @@ export function InsightsPage() {
                 key={z.zone}
                 type="button"
                 className="list-item insights-list-item"
-                onClick={() => navigate('/map')}
+                onClick={() => navigate('/yards')}
               >
                 <span className="insights-zone-badge">Z{z.zone}</span>
                 <div>

@@ -374,7 +374,7 @@ export function TrailerDetail() {
               <button
                 type="button"
                 className="btn btn-ghost"
-                onClick={() => navigate('/map')}
+                onClick={() => navigate('/yards')}
               >
                 Yards
               </button>

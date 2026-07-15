@@ -112,7 +112,6 @@ function buildSeries(opts: {
     end = new Date(opts.customTo)
     end.setHours(23, 59, 59, 999)
     if (end < start) {
-      const tmp = start
       start = startOfDay(opts.customTo)
       end = new Date(opts.customFrom)
       end.setHours(23, 59, 59, 999)

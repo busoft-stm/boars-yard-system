@@ -73,7 +73,11 @@ export default function App() {
                       </Route>
                       <Route element={<AppShell />}>
                         <Route index element={<CommandCenter />} />
-                        <Route path="map" element={<YardMapPage />} />
+                        <Route path="yards" element={<YardMapPage />} />
+                        <Route
+                          path="map"
+                          element={<Navigate to="/yards" replace />}
+                        />
                         <Route path="trailers" element={<TrailersPage />} />
                         <Route path="temperature" element={<TemperaturePage />} />
                         <Route path="gate" element={<GatePage />} />

@@ -66,7 +66,7 @@ export function GeofenceProvider({ children }: { children: ReactNode }) {
           title: 'Entered yard geofence',
           detail: `${ev.trailerNumber} · auto arrival event`,
           tone: 'info',
-          href: '/map',
+          href: '/yards',
         })
       }
     }

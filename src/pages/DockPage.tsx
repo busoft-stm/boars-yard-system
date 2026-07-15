@@ -6,9 +6,26 @@ import { useSnackbar } from '../components/Snackbar'
 import { useYard } from '../yard/YardContext'
 import {
   DOCK_PHASE_META,
+  OPS_HOLD_META,
+  trailerHasOpsHold,
   trailerNeedsDock,
   type DockPhase,
+  type Trailer,
 } from '../data/trailers'
+
+function readyDockBlockReason(t: Trailer): string | null {
+  if ((t.recordStatus ?? 'active') !== 'active') return 'Disabled'
+  if (trailerHasOpsHold(t)) {
+    const hold = t.opsHold === 'qa' || t.opsHold === 'yard' ? t.opsHold : 'qa'
+    return `Hold: ${OPS_HOLD_META[hold]}`
+  }
+  if (!trailerNeedsDock(t)) return 'Yard → departure'
+  return null
+}
+
+function canAssignFromReadyQueue(t: Trailer) {
+  return readyDockBlockReason(t) === null
+}
 
 const DOCK_FLOW: DockPhase[] = [
   'idle',
@@ -46,15 +63,18 @@ export function DockPage() {
   const ready = useMemo(
     () =>
       trailers
-        .filter(
-          (t) =>
-            trailerNeedsDock(t) &&
-            t.status === 'Ready to dock' &&
-            t.opsHold !== 'qa' &&
-            t.opsHold !== 'yard',
-        )
-        .sort((a, b) => b.dwellHours - a.dwellHours),
+        .filter((t) => t.status === 'Ready to dock')
+        .sort((a, b) => {
+          const aBlocked = canAssignFromReadyQueue(a) ? 0 : 1
+          const bBlocked = canAssignFromReadyQueue(b) ? 0 : 1
+          if (aBlocked !== bBlocked) return aBlocked - bBlocked
+          return b.dwellHours - a.dwellHours
+        }),
     [trailers],
+  )
+  const readyAssignable = useMemo(
+    () => ready.filter((t) => canAssignFromReadyQueue(t)),
+    [ready],
   )
   const skipDockCount = useMemo(
     () =>
@@ -94,9 +114,13 @@ export function DockPage() {
       showError(`${selectedDock.label} is occupied — unlock it first.`)
       return
     }
-    const nextReady = ready[0]
+    const nextReady = readyAssignable[0]
     if (!nextReady) {
-      showError('No trailers in the ready-to-dock queue.')
+      showError(
+        ready.length
+          ? 'Ready trailers are on hold or yard-depart — clear hold / enable Dock required.'
+          : 'No trailers in the ready-to-dock queue.',
+      )
       return
     }
     await handleAssign(nextReady.id, selectedDock.label)
@@ -210,7 +234,10 @@ export function DockPage() {
           <div className="stat-label">Ready to dock</div>
           <div className="stat-value">{ready.length}</div>
           <div className="stat-note">
-            Dock required
+            {readyAssignable.length} assignable
+            {ready.length > readyAssignable.length
+              ? ` · ${ready.length - readyAssignable.length} blocked`
+              : ''}
             {skipDockCount ? ` · ${skipDockCount} yard-depart` : ''}
           </div>
         </div>
@@ -256,38 +283,57 @@ export function DockPage() {
 
           <div className="panel-head" style={{ marginTop: '1.2rem' }}>
             <h2>Ready to dock</h2>
-            <span className="trailer-meta">{ready.length} waiting</span>
+            <span className="trailer-meta">
+              {readyAssignable.length} assignable
+              {ready.length !== readyAssignable.length
+                ? ` · ${ready.length} total`
+                : ''}
+            </span>
           </div>
           <div className="list">
-            {ready.map((t) => (
-              <div key={t.id} className="list-item insights-list-item static">
-                <span className="priority warn" />
-                <button
-                  type="button"
-                  className="dock-ready-main"
-                  onClick={() => navigate(`/trailer/${t.id}`)}
-                >
-                  <div className="trailer-id">
-                    {t.number} <OwnBadge ownership={t.ownership} />
-                  </div>
-                  <div className="trailer-meta">
-                    {t.slot ?? 'Yard'} · {formatTemp(t.actual)} · dwell{' '}
-                    {t.dwellHours.toFixed(1)} hr
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  disabled={busy || openDoors.length === 0}
-                  onClick={() => handleAssignReadyTrailer(t.id)}
-                >
-                  Assign door
-                </button>
-              </div>
-            ))}
+            {ready.map((t) => {
+              const blockReason = readyDockBlockReason(t)
+              const canAssign = !blockReason
+              return (
+                <div key={t.id} className="list-item insights-list-item static">
+                  <span
+                    className={`priority ${blockReason ? 'critical' : 'warn'}`}
+                  />
+                  <button
+                    type="button"
+                    className="dock-ready-main"
+                    onClick={() => navigate(`/trailer/${t.id}`)}
+                  >
+                    <div className="trailer-id">
+                      {t.number} <OwnBadge ownership={t.ownership} />
+                    </div>
+                    <div className="trailer-meta">
+                      {t.slot ?? 'Yard'} · {formatTemp(t.actual)} · dwell{' '}
+                      {t.dwellHours.toFixed(1)} hr
+                      {blockReason ? ` · ${blockReason}` : ''}
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    disabled={busy || openDoors.length === 0 || !canAssign}
+                    title={
+                      blockReason
+                        ? `Clear “${blockReason}” before assigning`
+                        : openDoors.length === 0
+                          ? 'No open dock doors'
+                          : 'Assign to an open door'
+                    }
+                    onClick={() => handleAssignReadyTrailer(t.id)}
+                  >
+                    Assign door
+                  </button>
+                </div>
+              )
+            })}
             {!ready.length ? (
               <div className="empty">
-                No dock-required trailers waiting
+                No trailers marked Ready to dock
                 {skipDockCount
                   ? ` · ${skipDockCount} on yard-depart workflow`
                   : ''}
@@ -388,7 +434,7 @@ export function DockPage() {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  disabled={busy || ready.length === 0}
+                  disabled={busy || readyAssignable.length === 0}
                   onClick={() => void handleAssignFromQueue()}
                 >
                   Assign from ready queue
@@ -398,13 +444,15 @@ export function DockPage() {
               <h2>{selectedDock.label}</h2>
               <p>
                 Door is open
-                {ready.length
-                  ? ` — next in queue: ${ready[0].number}`
-                  : ' — no ready-to-dock trailers waiting.'}
+                {readyAssignable.length
+                  ? ` — next in queue: ${readyAssignable[0].number}`
+                  : ready.length
+                    ? ' — ready trailers are blocked (hold / yard-depart).'
+                    : ' — no ready-to-dock trailers waiting.'}
               </p>
-              {ready.length > 0 ? (
+              {readyAssignable.length > 0 ? (
                 <div className="list" style={{ marginTop: '0.85rem' }}>
-                  {ready.slice(0, 4).map((t) => (
+                  {readyAssignable.slice(0, 4).map((t) => (
                     <button
                       key={t.id}
                       type="button"

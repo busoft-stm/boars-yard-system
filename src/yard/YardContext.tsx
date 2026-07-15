@@ -505,20 +505,19 @@ export function YardProvider({ children }: { children: ReactNode }) {
 
       if (trailer.status === status) return
 
-      if (
-        (status === 'Ready to dock' || status === 'At dock') &&
-        !trailerNeedsDock(trailer)
-      ) {
-        throw new Error(
-          `${trailer.number} skips dock — enable “Dock required” or stage for departure from Yards.`,
-        )
-      }
-
       let zone: Zone = trailer.zone
       let slot = trailer.slot
       let dockDoor = trailer.dockDoor
       let dockPhase: DockPhase = trailer.dockPhase ?? 'idle'
       let opsHold: OpsHold = trailer.opsHold ?? 'none'
+      // Ready / At dock implies dock workflow — auto-enable if still on yard-depart.
+      let dockRequired = trailer.dockRequired
+      if (
+        (status === 'Ready to dock' || status === 'At dock') &&
+        !trailerNeedsDock(trailer)
+      ) {
+        dockRequired = true
+      }
 
       if (status === 'Gate arrived') {
         zone = 'Gate'
@@ -539,7 +538,7 @@ export function YardProvider({ children }: { children: ReactNode }) {
       } else if (status === 'Outbound staged') {
         dockDoor = undefined
         dockPhase = 'idle'
-      } else if (status !== 'At dock') {
+      } else {
         dockPhase = 'idle'
       }
 
@@ -550,6 +549,7 @@ export function YardProvider({ children }: { children: ReactNode }) {
         dockDoor,
         dockPhase,
         opsHold,
+        dockRequired,
       })
     },
     [updateTrailer],

@@ -34,7 +34,7 @@ const links: {
 }[] = [
   { to: '/', label: 'Dashboard', icon: 'space_dashboard', end: true },
   { to: '/users', label: 'Users', icon: 'group', adminOnly: true },
-  { to: '/map', label: 'Yards', icon: 'map' },
+  { to: '/yards', label: 'Yards', icon: 'map' },
   { to: '/dock', label: 'Docks', icon: 'warehouse' },
   { to: '/trailers', label: 'Trailers', icon: 'local_shipping' },
   { to: '/devices', label: 'Trailer Devices', icon: 'devices' },

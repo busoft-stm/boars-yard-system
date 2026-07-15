@@ -331,7 +331,7 @@ export function GatePage() {
         ? 'Disabled lanes cannot be used for new check-ins. Historical events keep the lane name.'
         : 'This lane will be available for gate operations again.',
       confirmLabel: disabling ? 'Disable lane' : 'Enable lane',
-      danger: disabling,
+      tone: disabling ? 'danger' : 'default',
     })
     if (!ok) return
     setBusy(true)
@@ -899,7 +899,7 @@ export function GatePage() {
               <button
                 type="button"
                 className="btn btn-ghost"
-                onClick={() => navigate('/map')}
+                onClick={() => navigate('/yards')}
               >
                 Open Yards
               </button>

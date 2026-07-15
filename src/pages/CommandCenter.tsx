@@ -13,6 +13,7 @@ import { OpsKpiCard } from '../components/OpsKpiCard'
 import { useExceptions } from '../exceptions/ExceptionsContext'
 import { useGeofence } from '../geofence/GeofenceContext'
 import { trailerHasOpsHold } from '../data/trailers'
+import { SMART_ALERT_LABELS } from '../data/smartEnterprise'
 
 export function CommandCenter() {
   const navigate = useNavigate()
@@ -231,7 +232,7 @@ export function CommandCenter() {
       <section className="ops-zone-panel">
         <div className="ops-section-head">
           <h3>Facility zone occupancy</h3>
-          <Link to="/map">View layout</Link>
+          <Link to="/yards">View layout</Link>
         </div>
         <div className="ops-zone-grid">
           {facilityZones.primary.map((z, i) => (
@@ -239,7 +240,7 @@ export function CommandCenter() {
               key={z.zone}
               type="button"
               className="ops-zone-item"
-              onClick={() => navigate('/map')}
+              onClick={() => navigate('/yards')}
             >
               <div className="ops-zone-item-top">
                 <span className="ops-zone-name">Zone {z.zone}</span>
@@ -269,7 +270,7 @@ export function CommandCenter() {
                   key={z.zone}
                   type="button"
                   className="ops-zone-item"
-                  onClick={() => navigate('/map')}
+                  onClick={() => navigate('/yards')}
                 >
                   <div className="ops-zone-item-top">
                     <span className="ops-zone-name">Zone {z.zone}</span>
@@ -611,7 +612,7 @@ export function CommandCenter() {
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => navigate('/map')}
+            onClick={() => navigate('/yards')}
           >
             Open Yards
           </button>

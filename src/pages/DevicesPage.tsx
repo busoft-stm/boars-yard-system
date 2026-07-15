@@ -67,8 +67,6 @@ const CONN_TONES: Record<ConnStatus, string> = {
   offline: 'critical',
 }
 
-const ALL_LIFECYCLES = Object.keys(LIFECYCLE_META) as SmartLifecycle[]
-
 const LIFECYCLE_ACTIONS: SmartLifecycle[] = [
   'available',
   'charging',
@@ -166,15 +164,7 @@ export function DevicesPage() {
   const [q, setQ] = useState('')
   const [deviceFilter, setDeviceFilter] = useState('all')
   const [trailerFilter, setTrailerFilter] = useState('all')
-  const [gpsFilter, setGpsFilter] = useState('all')
-  const [bleFilter, setBleFilter] = useState('all')
-  const [rfidFilter, setRfidFilter] = useState('all')
-  const [tempFilter, setTempFilter] = useState('all')
-  const [fuelFilter, setFuelFilter] = useState('all')
   const [connFilter, setConnFilter] = useState('all')
-  const [firmwareFilter, setFirmwareFilter] = useState('all')
-  const [lastCommFilter, setLastCommFilter] = useState('all')
-  const [locationFilter, setLocationFilter] = useState('all')
   const [lifecycleFilter, setLifecycleFilter] = useState('all')
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -227,14 +217,6 @@ export function DevicesPage() {
       ...uniqueOptions(devices.map((d) => d.assignedTrailer)),
     ]
   }, [devices])
-  const sensorOptions = useMemo(
-    () =>
-      uniqueOptions(
-        ['ok', 'warn', 'offline', 'na'] as SensorStatus[],
-        (v) => SENSOR_LABELS[v as SensorStatus],
-      ),
-    [],
-  )
   const connOptions = useMemo(
     () =>
       uniqueOptions(
@@ -242,18 +224,6 @@ export function DevicesPage() {
         (v) => v,
       ),
     [],
-  )
-  const firmwareOptions = useMemo(
-    () => uniqueOptions(devices.map((d) => d.firmwareVersion)),
-    [devices],
-  )
-  const lastCommOptions = useMemo(
-    () => uniqueOptions(devices.map((d) => d.lastCommunication)),
-    [devices],
-  )
-  const locationOptions = useMemo(
-    () => uniqueOptions(devices.map((d) => d.currentLocation)),
-    [devices],
   )
   const lifecycleOptions = useMemo(
     () =>
@@ -291,41 +261,14 @@ export function DevicesPage() {
       } else if (trailerFilter !== 'all' && d.assignedTrailer !== trailerFilter) {
         return false
       }
-      if (gpsFilter !== 'all' && d.gpsStatus !== gpsFilter) return false
-      if (bleFilter !== 'all' && d.bleStatus !== bleFilter) return false
-      if (rfidFilter !== 'all' && d.rfidStatus !== rfidFilter) return false
-      if (tempFilter !== 'all' && d.temperatureSensorStatus !== tempFilter)
-        return false
-      if (fuelFilter !== 'all' && d.fuelSensorStatus !== fuelFilter) return false
       if (connFilter !== 'all' && d.connectivity !== connFilter) return false
-      if (firmwareFilter !== 'all' && d.firmwareVersion !== firmwareFilter)
-        return false
-      if (lastCommFilter !== 'all' && d.lastCommunication !== lastCommFilter)
-        return false
-      if (locationFilter !== 'all' && d.currentLocation !== locationFilter)
-        return false
       if (lifecycleFilter !== 'all' && d.lifecycle !== lifecycleFilter)
         return false
       return true
     })
-  }, [
-    devices,
-    q,
-    deviceFilter,
-    trailerFilter,
-    gpsFilter,
-    bleFilter,
-    rfidFilter,
-    tempFilter,
-    fuelFilter,
-    connFilter,
-    firmwareFilter,
-    lastCommFilter,
-    locationFilter,
-    lifecycleFilter,
-  ])
+  }, [devices, q, deviceFilter, trailerFilter, connFilter, lifecycleFilter])
 
-  const filterKey = `${q}|${deviceFilter}|${trailerFilter}|${gpsFilter}|${bleFilter}|${rfidFilter}|${tempFilter}|${fuelFilter}|${connFilter}|${firmwareFilter}|${lastCommFilter}|${locationFilter}|${lifecycleFilter}`
+  const filterKey = `${q}|${deviceFilter}|${trailerFilter}|${connFilter}|${lifecycleFilter}`
   const pagination = usePagination(rows, 10, filterKey)
 
   const selectedDevice = selectedId

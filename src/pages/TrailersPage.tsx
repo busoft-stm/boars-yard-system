@@ -9,8 +9,8 @@ import {
   TRAILER_TYPE_META,
   lengthToPreset,
   isOnSite,
+  trailerNeedsDock,
   type AddTrailerInput,
-  type OpsHold,
   type Ownership,
   type ReeferBrand,
   type TempStatus,
@@ -30,11 +30,13 @@ import {
   IconDisable,
   IconEdit,
   IconEnable,
+  IconStatus,
   ModalCloseBtn,
 } from '../components/ActionIcons'
 
 import { AssignSlotModal } from '../components/AssignSlotModal'
 import { GateCheckInModal } from '../components/GateCheckInModal'
+import { UpdateTrailerStatusModal } from '../components/UpdateTrailerStatusModal'
 import {
   ColumnFilterHeader,
   PlainHeader,
@@ -80,8 +82,6 @@ export function TrailersPage() {
     addTrailer,
     updateTrailer,
     setTrailerStatus,
-    setTrailerOpsHold,
-    setTrailerDockRequired,
     setTrailerRecordStatus,
   } = useYard()
   const { remapTrailerNumber } = useDevices()
@@ -106,6 +106,8 @@ export function TrailersPage() {
   const [assignTrailerId, setAssignTrailerId] = useState<string | null>(null)
   const [checkInOpen, setCheckInOpen] = useState(false)
   const [checkInTrailerId, setCheckInTrailerId] = useState<string | null>(null)
+  const [statusModalOpen, setStatusModalOpen] = useState(false)
+  const [statusTrailerId, setStatusTrailerId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [selectedSmartDeviceId, setSelectedSmartDeviceId] = useState<
@@ -158,6 +160,11 @@ export function TrailersPage() {
   function openAssignSlot(t: Trailer) {
     setAssignTrailerId(t.id)
     setAssignSlotOpen(true)
+  }
+
+  function openStatusModal(t: Trailer) {
+    setStatusTrailerId(t.id)
+    setStatusModalOpen(true)
   }
 
   const mappableSmartDevices = useMemo(
@@ -668,119 +675,29 @@ export function TrailersPage() {
                     </span>
                   </td>
                   <td>
-                    {t.recordStatus === 'active' ? (
-                      <div className="trailer-cell">
-                        <label className="inline-status">
-                          <span className="sr-only">Change yard status</span>
-                          <select
-                            className="select select-compact"
-                            value={
-                              t.status === 'QA hold' || t.status === 'Yard hold'
-                                ? 'In yard'
-                                : t.status
-                            }
-                            title="Yard status"
-                            aria-label="Yard status"
-                            onChange={(e) => {
-                              const next = e.target.value as TrailerStatus
-                              void (async () => {
-                                try {
-                                  await setTrailerStatus(t.id, next)
-                                  success(
-                                    `${t.number} yard status set to ${next}.`,
-                                  )
-                                } catch {
-                                  showError(
-                                    `Could not update yard status for ${t.number}.`,
-                                  )
-                                }
-                              })()
-                            }}
-                          >
-                            {yardStatuses.map((s) => (
-                              <option key={s} value={s}>
-                                {s}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        {t.status !== 'Departed' ? (
-                          <label className="inline-status">
-                            <span className="sr-only">Operational hold</span>
-                            <select
-                              className="select select-compact"
-                              value={t.opsHold ?? 'none'}
-                              title="Operational hold"
-                              aria-label="Operational hold"
-                              onChange={(e) => {
-                                const next = e.target.value as OpsHold
-                                void (async () => {
-                                  try {
-                                    await setTrailerOpsHold(t.id, next)
-                                    success(
-                                      next === 'none'
-                                        ? `${t.number} hold cleared.`
-                                        : `${t.number} · ${OPS_HOLD_META[next]}.`,
-                                    )
-                                  } catch (err) {
-                                    showError(
-                                      err instanceof Error
-                                        ? err.message
-                                        : `Could not update hold for ${t.number}.`,
-                                    )
-                                  }
-                                })()
-                              }}
-                            >
-                              {(Object.keys(OPS_HOLD_META) as OpsHold[]).map(
-                                (h) => (
-                                  <option key={h} value={h}>
-                                    Hold: {OPS_HOLD_META[h]}
-                                  </option>
-                                ),
-                              )}
-                            </select>
-                          </label>
-                        ) : null}
-                        {t.status !== 'Departed' ? (
-                          <label className="inline-status">
-                            <span className="sr-only">Dock workflow</span>
-                            <select
-                              className="select select-compact"
-                              value={
-                                t.dockRequired === false ? 'skip' : 'dock'
-                              }
-                              title="Dock workflow"
-                              aria-label="Dock workflow"
-                              onChange={(e) => {
-                                const next = e.target.value === 'dock'
-                                void (async () => {
-                                  try {
-                                    await setTrailerDockRequired(t.id, next)
-                                    success(
-                                      next
-                                        ? `${t.number} · dock required`
-                                        : `${t.number} · yard → departure`,
-                                    )
-                                  } catch (err) {
-                                    showError(
-                                      err instanceof Error
-                                        ? err.message
-                                        : `Could not update dock workflow for ${t.number}.`,
-                                    )
-                                  }
-                                })()
-                              }}
-                            >
-                              <option value="dock">Dock required</option>
-                              <option value="skip">Yard → departure</option>
-                            </select>
-                          </label>
-                        ) : null}
-                      </div>
-                    ) : (
+                    <div className="yard-status-cell">
                       <YardStatusPill trailer={t} />
-                    )}
+                      {t.recordStatus === 'active' && t.status !== 'Departed' ? (
+                        <span className="trailer-meta yard-status-meta">
+                          {(t.opsHold ?? 'none') !== 'none'
+                            ? `Hold: ${OPS_HOLD_META[t.opsHold ?? 'none']}`
+                            : 'No hold'}
+                          {' · '}
+                          {trailerNeedsDock(t)
+                            ? 'Dock required'
+                            : 'Yard → departure'}
+                        </span>
+                      ) : null}
+                      {t.recordStatus === 'active' ? (
+                        <button
+                          type="button"
+                          className="btn btn-ghost yard-status-update"
+                          onClick={() => openStatusModal(t)}
+                        >
+                          Update status
+                        </button>
+                      ) : null}
+                    </div>
                   </td>
                   <td className="mono">{trailerLocation(t)}</td>
                   <td>
@@ -813,6 +730,14 @@ export function TrailersPage() {
                       <ActionIconBtn label="Edit trailer" onClick={() => openEdit(t)}>
                         <IconEdit />
                       </ActionIconBtn>
+                      {t.recordStatus === 'active' ? (
+                        <ActionIconBtn
+                          label="Update yard status"
+                          onClick={() => openStatusModal(t)}
+                        >
+                          <IconStatus />
+                        </ActionIconBtn>
+                      ) : null}
                       {canCheckIn(t) ? (
                         <ActionIconBtn
                           label="Check in at gate"
@@ -1332,6 +1257,15 @@ export function TrailersPage() {
         onClose={() => {
           setAssignSlotOpen(false)
           setAssignTrailerId(null)
+        }}
+      />
+      <UpdateTrailerStatusModal
+        key={statusTrailerId ?? 'status'}
+        open={statusModalOpen}
+        trailerId={statusTrailerId}
+        onClose={() => {
+          setStatusModalOpen(false)
+          setStatusTrailerId(null)
         }}
       />
       {confirmDialog}

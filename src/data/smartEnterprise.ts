@@ -2005,7 +2005,7 @@ export const seedAiRecommendations: AiRecommendation[] = [
     body: 'BLE on C-01 (BH-3155) shows dock proximity; A-South still has open stalls for staging.',
     impact: 'Yard balance',
     actionLabel: 'Yards',
-    actionTo: '/map',
+    actionTo: '/yards',
     tone: 'info',
   },
   {

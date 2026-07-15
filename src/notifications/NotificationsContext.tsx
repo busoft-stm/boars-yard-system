@@ -6,7 +6,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { SnackbarTone } from './Snackbar'
+import type { SnackbarTone } from '../components/Snackbar'
 
 export type NotificationTone = 'critical' | 'warn' | 'info'
 
@@ -69,7 +69,7 @@ function hrefFromMessage(message: string): string {
     return '/integrations'
   }
   if (lower.includes('geofence') || lower.includes('fuel') || lower.includes('dwell')) {
-    return '/map'
+    return '/yards'
   }
   return '/exceptions'
 }

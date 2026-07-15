@@ -94,7 +94,7 @@ export const ROLE_NAV: Record<UserRole, string[] | 'all'> = {
   site_lead: 'all',
   yard_ops: [
     '/',
-    '/map',
+    '/yards',
     '/trailers',
     '/temperature',
     '/gate',
@@ -111,7 +111,7 @@ export const ROLE_NAV: Record<UserRole, string[] | 'all'> = {
   ],
   qa: [
     '/',
-    '/map',
+    '/yards',
     '/trailers',
     '/temperature',
     '/exceptions',
@@ -124,7 +124,7 @@ export const ROLE_NAV: Record<UserRole, string[] | 'all'> = {
   ],
   gate: [
     '/',
-    '/map',
+    '/yards',
     '/trailers',
     '/gate',
     '/dock',
@@ -135,7 +135,7 @@ export const ROLE_NAV: Record<UserRole, string[] | 'all'> = {
   ],
   viewer: [
     '/',
-    '/map',
+    '/yards',
     '/trailers',
     '/temperature',
     '/movements',
