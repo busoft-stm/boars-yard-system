@@ -1,0 +1,32 @@
+{
+  "fileKey": "Z1tWebB0pue0WuWzlkjym1",
+  "base": "http://127.0.0.1:5173",
+  "delay": 8000,
+  "done": [
+    { "path": "/login", "name": "Login", "status": "captured" },
+    { "path": "/", "name": "Dashboard", "status": "captured" },
+    { "path": "/users", "name": "Users", "captureId": "c04511ec-c908-4b6a-84bf-ffb62176846e", "status": "captured" }
+  ],
+  "pending": [
+    { "path": "/map", "name": "Yards", "captureId": "fe9bcb77-6794-4b97-8272-3fc455fa8174" },
+    { "path": "/dock", "name": "Docks", "captureId": "f8a71283-e757-4d86-88a5-aef8f7f0434b" },
+    { "path": "/trailers", "name": "Trailers", "captureId": "8743d8d6-8b5e-49b9-8e07-18f1822d2bdb" },
+    { "path": "/devices", "name": "Trailer Devices", "captureId": "22ea97cf-614f-41bd-8c84-bbb2d487e49b" },
+    { "path": "/infrastructure", "name": "Infrastructure", "captureId": "b0c71d7a-1ee4-4dc4-93b0-8bf38df30aff" },
+    { "path": "/infrastructure-v2", "name": "Infrastructure V2", "captureId": "e9df90e4-1cc2-4408-b78c-d78dd6d7bf8f" },
+    { "path": "/gate", "name": "Gates", "captureId": "fc187a7e-4084-492a-baa8-94221497b484" },
+    { "path": "/temperature", "name": "Cold Chain", "captureId": "497dcc03-5b0b-402a-b2c3-13937275f3d0" },
+    { "path": "/analytics", "name": "Analytics", "captureId": "bd1fb8ed-acce-402b-bacb-024805d9a5a1" },
+    { "path": "/insights", "name": "Insights", "captureId": "9d4e60d1-56d3-439e-b168-108a0b10d049" },
+    { "path": "/integrations", "name": "Integrations", "captureId": "7e4fa6b6-9e9f-4cca-9dae-fc16f81d87f8" },
+    { "path": "/architecture", "name": "Architecture", "captureId": "8065ea4e-6964-4f28-97ea-5225584f898e" },
+    { "path": "/exceptions", "name": "Exceptions", "captureId": "5536b051-f77d-4d49-90bc-7c9507f3979f" },
+    { "path": "/movements", "name": "Movements", "captureId": "56e23cc1-bf53-46f5-86d3-dab91a745117" },
+    { "path": "/trailer/bh-4412", "name": "Trailer Detail", "captureId": "ece5b803-a562-4f88-910e-10cf8ebab44a" },
+    { "path": "/m", "name": "Mobile Home", "captureId": "142c9385-143e-4051-b863-7c1ccdb7e9d6" },
+    { "path": "/m/scan", "name": "Mobile Scan", "captureId": "032c7410-d992-436c-bb55-d983c62ea75b" },
+    { "path": "/m/inspect", "name": "Mobile Inspect", "captureId": "587923c5-56fd-494f-a9d8-113a1fd552a4" },
+    { "path": "/m/alerts", "name": "Mobile Alerts", "captureId": "dbfc8d1b-6aa0-4e8d-ac9a-6ab468e94b33" },
+    { "path": "/m/map", "name": "Mobile Map", "captureId": "00b0551f-c2b1-4f7f-84af-f3584149a52b" }
+  ]
+}
