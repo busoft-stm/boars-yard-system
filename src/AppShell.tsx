@@ -42,9 +42,6 @@ const links: {
   { to: '/gate', label: 'Gates', icon: 'sensor_door' },
   { to: '/temperature', label: 'Cold Chain', icon: 'ac_unit' },
   { to: '/analytics', label: 'Analytics', icon: 'analytics' },
-  { to: '/reports', label: 'Reports', icon: 'description' },
-  { to: '/insights', label: 'Insights', icon: 'lightbulb' },
-  { to: '/integrations', label: 'Integrations', icon: 'hub' },
 ]
 
 type NotifTone = 'critical' | 'warn' | 'info'

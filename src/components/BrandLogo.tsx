@@ -1,11 +1,13 @@
+import brandLogoUrl from '../assets/boars_head_logo.png'
+
 type BrandLogoProps = {
   className?: string
   size?: number
   alt?: string
 }
 
-/** Public asset path that respects Vite `base` (GitHub Pages /boars-yard-system/). */
-export const BRAND_LOGO_SRC = `${import.meta.env.BASE_URL}boars_head_logo.webp`
+/** Bundled logo URL (emitted under /assets/…). */
+export const BRAND_LOGO_SRC = brandLogoUrl
 
 export function BrandLogo({
   className = 'brand-logo',

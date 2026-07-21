@@ -2464,6 +2464,43 @@ tr:last-child td {
   color: var(--ink-soft);
 }
 
+.trailers-head-actions {
+  align-items: center;
+}
+
+.btn-otm-sync {
+  gap: 0.4rem;
+  background: linear-gradient(180deg, #fffdf8 0%, #f3ebe0 100%);
+  border: 1px solid rgba(138, 116, 73, 0.35);
+  color: var(--ink);
+  box-shadow: 0 8px 20px rgba(52, 48, 43, 0.08);
+}
+
+.btn-otm-sync:hover:not(:disabled) {
+  border-color: rgba(138, 116, 73, 0.55);
+  background: linear-gradient(180deg, #fffefb 0%, #efe4d0 100%);
+  box-shadow: 0 10px 24px rgba(138, 116, 73, 0.16);
+}
+
+.btn-otm-sync.is-syncing,
+.btn-otm-sync:disabled {
+  filter: none;
+  background: linear-gradient(180deg, #f7f1e7 0%, #ebe2d4 100%);
+  border-style: solid;
+  border-color: rgba(138, 116, 73, 0.28);
+  color: var(--ink-soft);
+}
+
+.btn-otm-sync-spin {
+  animation: otm-sync-spin 0.9s linear infinite;
+}
+
+@keyframes otm-sync-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .page-head-actions {
   display: flex;
   flex-direction: column;
@@ -5833,10 +5870,11 @@ button.linkish {
   color: #fff8ef;
   font-size: 0.74rem;
   font-weight: 650;
-  line-height: 1.25;
+  line-height: 1.35;
   letter-spacing: 0.01em;
-  white-space: nowrap;
-  max-width: min(260px, 80vw);
+  white-space: normal;
+  text-align: center;
+  max-width: min(320px, 85vw);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
   pointer-events: none;
   animation: global-tip-in 120ms ease;

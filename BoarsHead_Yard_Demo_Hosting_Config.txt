@@ -1,0 +1,52 @@
+Boar's Head Yard Management — Hosting Guide
+=====================================================
+
+What this is
+------------
+Static demo site (Vite + React production build).
+No backend, no Node.js, no database.
+
+What to upload
+--------------
+Extract the attached package into the website root, e.g.: /var/www/html/
+
+Expected URL: https://<demo-domain>/
+
+Important
+---------
+This is a Single Page App (SPA).
+Routes like /trailers must fall back to index.html,
+or they will return 404.
+
+
+Nginx
+-----
+root /var/www/html;
+index index.html;
+
+location /assets/ {
+    try_files $uri =404;
+}
+
+location / {
+    try_files $uri $uri/ /index.html;
+}
+
+
+Apache (.htaccess in site root)
+-------------------------------
+RewriteEngine On
+RewriteBase /
+RewriteRule ^index\.html$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+
+Checklist
+---------
+1. Copy dist/ files to web root
+2. Apply Nginx or Apache rules above
+3. Open https://<demo-domain>/
+4. Check deep link: /trailers
+5. Keep live through July 31

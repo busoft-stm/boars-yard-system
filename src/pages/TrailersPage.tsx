@@ -45,6 +45,7 @@ import {
 import { useConfirmDialog } from '../components/ConfirmDialog'
 import { Pagination, usePagination } from '../components/Pagination'
 import { useSnackbar } from '../components/Snackbar'
+import { MaterialIcon } from '../components/MaterialIcon'
 import { useYard } from '../yard/YardContext'
 import { useDevices } from '../devices/DevicesContext'
 import { useSmartYard } from '../smart/SmartYardContext'
@@ -92,9 +93,10 @@ export function TrailersPage() {
     unassignDevice,
   } = useSmartYard()
   const { confirm, dialog: confirmDialog } = useConfirmDialog()
-  const { success, error: showError } = useSnackbar()
+  const { success, error: showError, info } = useSnackbar()
 
   const [q, setQ] = useState('')
+  const [otmSyncing, setOtmSyncing] = useState(false)
   const [trailerFilter, setTrailerFilter] = useState('all')
   const [recordFilter, setRecordFilter] = useState('all')
   const [yardStatusFilter, setYardStatusFilter] = useState('all')
@@ -548,6 +550,20 @@ export function TrailersPage() {
     }
   }
 
+  async function handleOtmSync() {
+    setOtmSyncing(true)
+    info('Syncing trailer register from Oracle Transportation Management (OTM)…')
+    try {
+      await new Promise((resolve) => window.setTimeout(resolve, 1400))
+      const onSite = trailers.filter(isOnSite).length
+      success(`OTM sync complete · ${onSite} trailers refreshed.`)
+    } catch {
+      showError('OTM sync failed. Try again or contact IT.')
+    } finally {
+      setOtmSyncing(false)
+    }
+  }
+
   return (
     <div className="page-enter">
       <div className="page-head">
@@ -560,7 +576,31 @@ export function TrailersPage() {
             site. Gates still runs the live lane queue.
           </p>
         </div>
-        <div className="btn-row">
+        <div className="btn-row trailers-head-actions">
+          <button
+            type="button"
+            className={`btn btn-otm-sync${otmSyncing ? ' is-syncing' : ''}`}
+            onClick={() => void handleOtmSync()}
+            disabled={otmSyncing}
+            aria-busy={otmSyncing}
+            data-tooltip={
+              otmSyncing
+                ? 'Syncing trailer identity, carrier, and yard movement data from Oracle Transportation Management (OTM)…'
+                : 'Pull latest trailer identity, carrier, appointment, and yard movement data from Oracle Transportation Management (OTM)'
+            }
+            aria-label={
+              otmSyncing
+                ? 'Syncing trailer data from Oracle Transportation Management'
+                : 'Sync trailer data from Oracle Transportation Management'
+            }
+          >
+            <MaterialIcon
+              name="sync"
+              size={18}
+              className={otmSyncing ? 'btn-otm-sync-spin' : ''}
+            />
+            {otmSyncing ? 'Syncing…' : 'Sync from OTM'}
+          </button>
           <button type="button" className="btn btn-primary" onClick={openCreate}>
             Register trailer
           </button>

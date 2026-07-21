@@ -7,12 +7,12 @@ import react from '@vitejs/plugin-react'
 const rootDir = dirname(fileURLToPath(import.meta.url))
 
 /**
- * GitHub Pages has no SPA rewrite. Unknown paths serve 404.html.
- * Shipping the same shell as index.html lets React Router handle /trailers etc.
+ * SPA fallback for static hosts without rewrite rules.
+ * Unknown paths can serve 404.html (same shell as index.html).
  */
-function githubPagesSpaFallback(): Plugin {
+function spaFallback(): Plugin {
   return {
-    name: 'github-pages-spa-fallback',
+    name: 'spa-fallback',
     closeBundle() {
       const outDir = resolve(rootDir, 'dist')
       copyFileSync(resolve(outDir, 'index.html'), resolve(outDir, '404.html'))
@@ -21,9 +21,8 @@ function githubPagesSpaFallback(): Plugin {
   }
 }
 
-// GitHub Pages project site: https://busoft-stm.github.io/boars-yard-system/
-// Local `npm run dev` stays at http://localhost:5174/
-export default defineConfig(({ command }) => ({
-  plugins: [react(), ...(command === 'build' ? [githubPagesSpaFallback()] : [])],
-  base: command === 'build' ? '/boars-yard-system/' : '/',
-}))
+// Deploy at domain root (e.g. https://your-demo-domain.com/)
+export default defineConfig({
+  plugins: [react(), spaFallback()],
+  base: '/',
+})
